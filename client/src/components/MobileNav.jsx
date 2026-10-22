@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, RotateCcw, Wallet, Handshake, User } from 'lucide-react';
+import { Home, RotateCcw, Wallet, Zap, Building, User } from 'lucide-react';
 
 export default function MobileNav({ currentView, onNavigate }) {
   return (
@@ -9,7 +9,7 @@ export default function MobileNav({ currentView, onNavigate }) {
         className={`nav-item ${currentView === 'catalog' ? 'active' : ''}`}
         onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
       >
-        <Home size={20} />
+        <Home size={19} />
         <span>Home</span>
       </a>
 
@@ -18,7 +18,7 @@ export default function MobileNav({ currentView, onNavigate }) {
         className={`nav-item ${currentView === 'repeat' ? 'active' : ''}`}
         onClick={(e) => { e.preventDefault(); onNavigate('repeat'); }}
       >
-        <RotateCcw size={20} />
+        <RotateCcw size={19} />
         <span>Repeat</span>
       </a>
 
@@ -27,20 +27,26 @@ export default function MobileNav({ currentView, onNavigate }) {
         className={`nav-item ${currentView === 'wallet' ? 'active' : ''}`}
         onClick={(e) => { e.preventDefault(); onNavigate('wallet'); }}
       >
-        <div style={{ position: 'relative' }}>
-          <Wallet size={20} />
-          <span style={{ position: 'absolute', top: '-6px', right: '-12px', background: '#E2E8F0', fontSize: '9px', padding: '1px 3px', borderRadius: '4px', fontWeight: 'bold', color: '#0F172A' }}>₹0</span>
-        </div>
+        <Wallet size={19} />
         <span>Wallet</span>
       </a>
 
       <a
         href="#"
-        className={`nav-item ${currentView === 'partner' ? 'active' : ''}`}
-        onClick={(e) => { e.preventDefault(); onNavigate('partner'); }}
+        className={`nav-item ${currentView === 'challenges' ? 'active' : ''}`}
+        onClick={(e) => { e.preventDefault(); onNavigate('challenges'); }}
       >
-        <Handshake size={20} />
-        <span>Partner</span>
+        <Zap size={19} />
+        <span>Deals</span>
+      </a>
+
+      <a
+        href="#"
+        className={`nav-item ${currentView === 'seller' ? 'active' : ''}`}
+        onClick={(e) => { e.preventDefault(); onNavigate('seller'); }}
+      >
+        <Building size={19} />
+        <span>Seller</span>
       </a>
 
       <a
@@ -48,7 +54,7 @@ export default function MobileNav({ currentView, onNavigate }) {
         className={`nav-item ${currentView === 'profile' ? 'active' : ''}`}
         onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}
       >
-        <User size={20} />
+        <User size={19} />
         <span>Profile</span>
       </a>
     </nav>

@@ -8,6 +8,12 @@ import RepeatPage from './components/RepeatPage';
 import WalletPage from './components/WalletPage';
 import PartnerPage from './components/PartnerPage';
 import ProfilePage from './components/ProfilePage';
+import ChallengesPage from './components/ChallengesPage';
+import SellerPortal from './components/SellerPortal';
+import CartDrawer from './components/CartDrawer';
+import CheckoutModal from './components/CheckoutModal';
+import ChallengeModal from './components/ChallengeModal';
+import OrderTrackingModal from './components/OrderTrackingModal';
 import AuthModal from './components/AuthModal';
 import MobileNav from './components/MobileNav';
 import Footer from './components/Footer';
@@ -17,19 +23,65 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Navigation State: 'catalog' | 'detail' | 'repeat' | 'wallet' | 'partner' | 'profile'
+
+  // Navigation State: 'catalog' | 'detail' | 'repeat' | 'wallet' | 'challenges' | 'seller' | 'partner' | 'profile'
   const [currentView, setCurrentView] = useState('catalog');
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Cart State (Persisted in localStorage)
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cr_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Modals
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutItems, setCheckoutItems] = useState([]);
+
+  const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
+  const [challengeProduct, setChallengeProduct] = useState(null);
+
+  const [isOrderTrackingOpen, setIsOrderTrackingOpen] = useState(false);
+  const [trackingOrder, setTrackingOrder] = useState(null);
+
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState({ name: 'aditi', email: 'aditi@business.com', role: 'buyer' });
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cr_user');
+      return saved ? JSON.parse(saved) : { id: 'usr_demo', name: 'aditi', email: 'aditi@business.com', role: 'buyer' };
+    } catch {
+      return { id: 'usr_demo', name: 'aditi', email: 'aditi@business.com', role: 'buyer' };
+    }
+  });
+
   const [toastMessage, setToastMessage] = useState('');
 
-  // Fetch products from Express REST API
+  // Persist cart to localStorage
   useEffect(() => {
-    let isMounted = true;
+    try {
+      localStorage.setItem('cr_cart', JSON.stringify(cartItems));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [cartItems]);
+
+  // Persist user to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('cr_user', JSON.stringify(currentUser));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [currentUser]);
+
+  // Fetch products from Express REST API
+  const fetchProducts = () => {
     setLoading(true);
-    
     const queryParams = new URLSearchParams();
     if (activeCategory && activeCategory !== 'All') queryParams.append('category', activeCategory);
     if (searchTerm) queryParams.append('q', searchTerm);
@@ -37,18 +89,138 @@ export default function App() {
     fetch(`/api/products?${queryParams.toString()}`)
       .then((res) => res.json())
       .then((data) => {
-        if (isMounted && data.success) {
+        if (data.success) {
           setProducts(data.data);
         }
-        if (isMounted) setLoading(false);
+        setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to fetch products:', err);
-        if (isMounted) setLoading(false);
+        setLoading(false);
       });
+  };
 
-    return () => { isMounted = false; };
+  useEffect(() => {
+    fetchProducts();
   }, [activeCategory, searchTerm]);
+
+  const extractNumber = (val, defaultVal = 1) => {
+    if (typeof val === 'number') return val;
+    if (!val) return defaultVal;
+    const match = String(val).replace(/,/g, '').match(/\d+/);
+    return match ? parseInt(match[0], 10) : defaultVal;
+  };
+
+  // Add Product to Cart with MOQ validation
+  const handleAddToCart = (product, customQty = null) => {
+    const minQty = extractNumber(product.minOrder || product.moq, 1);
+    const step = extractNumber(product.orderMultiple || product.moq, 1);
+    const addQty = customQty ? Number(customQty) : minQty;
+
+    setCartItems((prevItems) => {
+      const existingIndex = prevItems.findIndex((it) => it._id === product._id);
+      if (existingIndex > -1) {
+        const updated = [...prevItems];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + (customQty ? Number(customQty) : step)
+        };
+        return updated;
+      } else {
+        return [...prevItems, { ...product, quantity: addQty }];
+      }
+    });
+
+    setIsCartOpen(true);
+    setToastMessage(`Added "${product.title}" (${addQty} ${product.unit || 'units'}) to your Wholesale Cart!`);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  const handleUpdateQuantity = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      handleRemoveItem(productId);
+      return;
+    }
+    setCartItems((prev) =>
+      prev.map((item) => (item._id === productId ? { ...item, quantity: newQuantity } : item))
+    );
+  };
+
+  const handleRemoveItem = (productId) => {
+    setCartItems((prev) => prev.filter((item) => item._id !== productId));
+  };
+
+  const handleClearCart = () => {
+    setCartItems([]);
+  };
+
+  const handleProceedToCheckout = (itemsToCheckout) => {
+    setCheckoutItems(itemsToCheckout);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleOrderSuccess = (newOrder) => {
+    setCartItems([]);
+    setTrackingOrder(newOrder);
+    setIsOrderTrackingOpen(true);
+    setToastMessage(`Order #${newOrder.orderNumber} confirmed! Escrow protection activated.`);
+    setTimeout(() => setToastMessage(''), 5000);
+  };
+
+  const handleOpenChallenge = (product) => {
+    setChallengeProduct(product);
+    setIsChallengeModalOpen(true);
+  };
+
+  const handleChallengeSuccess = (challenge) => {
+    setToastMessage(`Rate challenge #${challenge.challengeId} submitted! Manufacturer notified.`);
+    setTimeout(() => setToastMessage(''), 4500);
+    setCurrentView('challenges');
+  };
+
+  const handleOrderNegotiatedDeal = (deal) => {
+    // Add negotiated custom deal item to cart
+    const negotiatedItem = {
+      _id: deal.product || deal._id,
+      title: deal.productTitle,
+      image: deal.productImage,
+      basePrice: deal.counterOfferPrice || deal.proposedPrice,
+      currentUnitPrice: deal.counterOfferPrice || deal.proposedPrice,
+      quantity: deal.requestedQuantity,
+      unit: deal.unit || 'Unit',
+      minOrder: `${deal.requestedQuantity} ${deal.unit}`,
+      orderMultiple: `${deal.requestedQuantity} ${deal.unit}`,
+      supplier: { name: deal.supplierName },
+      gstRate: '5%',
+      packing: 'Negotiated Bulk Consignment',
+      isNegotiated: true
+    };
+
+    setCheckoutItems([negotiatedItem]);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleReorderToCart = (pastOrder) => {
+    if (!pastOrder.items || pastOrder.items.length === 0) return;
+    const itemsToAdd = pastOrder.items.map((it) => ({
+      _id: it.product || `reorder_${Date.now()}_${Math.random()}`,
+      title: it.title,
+      image: it.image,
+      basePrice: it.unitPrice,
+      unit: it.unit,
+      quantity: it.quantity,
+      supplier: { name: it.supplierName },
+      packing: it.packing,
+      gstRate: it.gstRate,
+      minOrder: `${it.quantity} ${it.unit}`,
+      orderMultiple: `${it.quantity} ${it.unit}`
+    }));
+
+    setCartItems(itemsToAdd);
+    setIsCartOpen(true);
+    setToastMessage(`Loaded ${itemsToAdd.length} items from Order #${pastOrder.orderNumber} into Cart!`);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
 
   const handleNavigate = (view) => {
     setCurrentView(view);
@@ -62,19 +234,21 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleChallengeRate = (product) => {
-    setToastMessage(`Rate challenge submitted for "${product.title}"! Supplier notified.`);
-    setTimeout(() => setToastMessage(''), 4000);
-  };
-
-  const handleOrder = (product) => {
-    setToastMessage(`Order placed for "${product.title}" (${product.minOrder || product.moq})!`);
-    setTimeout(() => setToastMessage(''), 4000);
+  const handleRoleSwitch = (newRole) => {
+    setCurrentUser((prev) => ({
+      ...prev,
+      role: newRole,
+      businessName: newRole === 'supplier' ? 'Clonex Manufacturing Surat' : 'Aditi Commercial Traders'
+    }));
+    setToastMessage(`Switched mode to ${newRole === 'supplier' ? 'Manufacturer' : 'Wholesale Buyer'}!`);
+    setTimeout(() => setToastMessage(''), 3000);
+    if (newRole === 'supplier') setCurrentView('seller');
+    else setCurrentView('catalog');
   };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Top Header matching user screenshot */}
+      {/* Top Header */}
       <Header
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -82,13 +256,15 @@ export default function App() {
         currentUser={currentUser}
         currentView={currentView}
         onNavigate={handleNavigate}
+        cartCount={cartItems.reduce((acc, it) => acc + (it.quantity > 0 ? 1 : 0), 0)}
+        onOpenCart={() => setIsCartOpen(true)}
       />
 
       {/* Main Content Area */}
       <main style={{ flex: 1 }}>
         {/* Toast Notification */}
         {toastMessage && (
-          <div style={{ maxWidth: '600px', margin: '1rem auto 0', background: '#D1FAE5', color: '#065F46', padding: '0.75rem 1.25rem', borderRadius: '9999px', fontSize: '0.875rem', fontWeight: 600, textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <div style={{ maxWidth: '640px', margin: '1rem auto 0', background: '#D1FAE5', color: '#065F46', padding: '0.75rem 1.25rem', borderRadius: '9999px', fontSize: '0.875rem', fontWeight: 600, textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
             🎉 {toastMessage}
           </div>
         )}
@@ -98,21 +274,38 @@ export default function App() {
           <ProductDetail
             product={selectedProduct}
             onBack={() => handleNavigate('catalog')}
-            onOrderClick={handleOrder}
+            onOrderClick={handleAddToCart}
+            onChallengeRate={handleOpenChallenge}
           />
         ) : currentView === 'repeat' ? (
           <RepeatPage
-            onReorderClick={(order) => {
-              setToastMessage(`Re-order initiated for "${order.title}"!`);
-              setTimeout(() => setToastMessage(''), 4000);
+            currentUser={currentUser}
+            onReorderToCart={handleReorderToCart}
+            onTrackOrder={(order) => {
+              setTrackingOrder(order);
+              setIsOrderTrackingOpen(true);
             }}
           />
         ) : currentView === 'wallet' ? (
           <WalletPage currentUser={currentUser} />
+        ) : currentView === 'challenges' ? (
+          <ChallengesPage
+            currentUser={currentUser}
+            onOrderNegotiatedDeal={handleOrderNegotiatedDeal}
+          />
+        ) : currentView === 'seller' ? (
+          <SellerPortal
+            currentUser={currentUser}
+            onProductAdded={fetchProducts}
+          />
         ) : currentView === 'partner' ? (
-          <PartnerPage />
+          <PartnerPage currentUser={currentUser} />
         ) : currentView === 'profile' ? (
-          <ProfilePage currentUser={currentUser} onOpenAuth={() => setIsAuthOpen(true)} />
+          <ProfilePage
+            currentUser={currentUser}
+            onOpenAuth={() => setIsAuthOpen(true)}
+            onRoleSwitch={handleRoleSwitch}
+          />
         ) : (
           /* Catalog View */
           <>
@@ -129,7 +322,7 @@ export default function App() {
                   Verified Wholesale Catalog ({products.length} Items)
                 </h2>
                 <span style={{ fontSize: '0.8rem', color: '#64748B' }}>
-                  Click any product to view detailed specifications
+                  Direct Factory Prices • Pan-India Delivery
                 </span>
               </div>
 
@@ -148,8 +341,9 @@ export default function App() {
                     <ProductCard
                       key={product._id}
                       product={product}
-                      onChallengeRate={handleChallengeRate}
+                      onChallengeRate={handleOpenChallenge}
                       onSelectProduct={handleSelectProduct}
+                      onAddToCart={handleAddToCart}
                     />
                   ))}
                 </div>
@@ -162,6 +356,46 @@ export default function App() {
       {/* Footer */}
       <Footer />
 
+      {/* Cart Drawer */}
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cartItems={cartItems}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemoveItem={handleRemoveItem}
+        onClearCart={handleClearCart}
+        onProceedToCheckout={handleProceedToCheckout}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        items={checkoutItems}
+        currentUser={currentUser}
+        onOrderSuccess={handleOrderSuccess}
+      />
+
+      {/* Challenge Rate Negotiation Modal */}
+      <ChallengeModal
+        isOpen={isChallengeModalOpen}
+        onClose={() => setIsChallengeModalOpen(false)}
+        product={challengeProduct}
+        currentUser={currentUser}
+        onChallengeSuccess={handleChallengeSuccess}
+      />
+
+      {/* Order Tracking Modal */}
+      <OrderTrackingModal
+        isOpen={isOrderTrackingOpen}
+        onClose={() => setIsOrderTrackingOpen(false)}
+        order={trackingOrder}
+        onDeliveryConfirmed={(updatedOrder) => {
+          setTrackingOrder(updatedOrder);
+          fetchProducts();
+        }}
+      />
+
       {/* Mobile Sticky Toolbar */}
       <MobileNav
         currentView={currentView}
@@ -172,7 +406,11 @@ export default function App() {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={(user) => setCurrentUser(user)}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setToastMessage(`Welcome back, ${user.name}!`);
+          setTimeout(() => setToastMessage(''), 3000);
+        }}
       />
     </div>
   );

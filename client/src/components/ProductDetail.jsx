@@ -1,11 +1,11 @@
 import React from 'react';
-import { CheckCircle2, Eye, Share2, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Eye, Share2, ArrowLeft, Zap, ShoppingCart } from 'lucide-react';
 
-export default function ProductDetail({ product, onBack, onOrderClick }) {
+export default function ProductDetail({ product, onBack, onOrderClick, onChallengeRate }) {
   if (!product) return null;
 
   return (
-    <div className="product-detail-container" style={{ maxW: '1280px', margin: '0 auto', padding: '1.5rem' }}>
+    <div className="product-detail-container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem' }}>
       {/* Back button */}
       <button
         onClick={onBack}
@@ -38,7 +38,7 @@ export default function ProductDetail({ product, onBack, onOrderClick }) {
           {/* Seller / Brand Profile Box */}
           <div style={{ marginTop: '1.25rem', background: '#F1F5F9', borderRadius: '1.25rem', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: '38px', height: '38px', background: '#0F3B9A', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontWeight: 800, fontSize: '0.9rem' }}>
+              <div style={{ width: '38px', height: '38px', background: '#0F3B9A', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem' }}>
                 CR
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -71,14 +71,25 @@ export default function ProductDetail({ product, onBack, onOrderClick }) {
             </div>
           </div>
 
-          {/* Big Order CTA */}
+          {/* Action CTAs: Order (Cart) & Challenge Rate */}
           <div>
-            <button
-              onClick={() => onOrderClick(product)}
-              style={{ width: '100%', background: '#00A3FF', color: 'white', border: 'none', padding: '0.85rem', borderRadius: '9999px', fontSize: '1.05rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(0, 163, 255, 0.3)' }}
-            >
-              Order
-            </button>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '0.75rem' }}>
+              <button
+                onClick={() => onOrderClick(product)}
+                style={{ width: '100%', background: '#00A3FF', color: 'white', border: 'none', padding: '0.85rem', borderRadius: '9999px', fontSize: '1.05rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(0, 163, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                <ShoppingCart size={18} />
+                <span>Order ({product.minOrder || product.moq})</span>
+              </button>
+
+              <button
+                onClick={() => onChallengeRate && onChallengeRate(product)}
+                style={{ width: '100%', background: 'linear-gradient(135deg, #0F3B9A, #0E2F6F)', color: 'white', border: 'none', padding: '0.85rem', borderRadius: '9999px', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(15, 59, 154, 0.25)' }}
+              >
+                <Zap size={16} />
+                <span>Challenge Rate</span>
+              </button>
+            </div>
             <p style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '0.5rem', textAlign: 'center' }}>
               Quantity starts at {product.minOrder || product.moq}. Edit it in View Cart by {product.orderMultiple || product.moq} each time.
             </p>
@@ -110,7 +121,7 @@ export default function ProductDetail({ product, onBack, onOrderClick }) {
             </h3>
             <div style={{ padding: '0.75rem 1.25rem', display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid #F1F5F9', fontSize: '0.875rem' }}>
               <span style={{ color: '#64748B' }}>Company</span>
-              <span style={{ fontWeight: 600, color: '#0F172A' }}>{product.supplier.name}</span>
+              <span style={{ fontWeight: 600, color: '#0F172A' }}>{product.supplier ? product.supplier.name : 'Verified'}</span>
             </div>
             <div style={{ padding: '0.75rem 1.25rem', display: 'grid', gridTemplateColumns: '140px 1fr', borderBottom: '1px solid #F1F5F9', fontSize: '0.875rem' }}>
               <span style={{ color: '#64748B' }}>Packing</span>
@@ -118,7 +129,7 @@ export default function ProductDetail({ product, onBack, onOrderClick }) {
             </div>
             <div style={{ padding: '0.75rem 1.25rem', display: 'grid', gridTemplateColumns: '140px 1fr', fontSize: '0.875rem' }}>
               <span style={{ color: '#64748B' }}>Location</span>
-              <span style={{ fontWeight: 600, color: '#0F172A' }}>{product.supplier.location}</span>
+              <span style={{ fontWeight: 600, color: '#0F172A' }}>{product.supplier ? product.supplier.location : 'Surat'}</span>
             </div>
           </div>
 

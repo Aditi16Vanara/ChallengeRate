@@ -1,13 +1,22 @@
 import React from 'react';
-import { Search, Lock, User, Home, RotateCcw, Wallet, Handshake } from 'lucide-react';
+import { Search, Lock, User, Home, RotateCcw, Wallet, Handshake, ShoppingCart, Zap, Building } from 'lucide-react';
 
-export default function Header({ searchTerm, setSearchTerm, onOpenAuth, currentUser, currentView, onNavigate }) {
+export default function Header({
+  searchTerm,
+  setSearchTerm,
+  onOpenAuth,
+  currentUser,
+  currentView,
+  onNavigate,
+  cartCount,
+  onOpenCart
+}) {
   return (
     <header className="site-header">
-      <div className="header-container" style={{ maxWidth: '1380px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+      <div className="header-container" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
         {/* Brand Logo */}
-        <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }} className="brand-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}>
-          <div className="logo-badge" style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, #21A3FF, #0F3B9A)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'white', fontWeight: 'bold' }}>
+        <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }} className="brand-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', flexShrink: 0 }}>
+          <div className="logo-badge" style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, #21A3FF, #0F3B9A)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
             CR
           </div>
           <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F2F6F' }}>ChallengeRate</span>
@@ -15,7 +24,7 @@ export default function Header({ searchTerm, setSearchTerm, onOpenAuth, currentU
         </a>
 
         {/* Search Bar */}
-        <div className="search-wrapper" style={{ flex: 1, maxWidth: '450px', position: 'relative', display: 'flex', gap: '0.5rem' }}>
+        <div className="search-wrapper" style={{ flex: 1, maxWidth: '420px', position: 'relative', display: 'flex', gap: '0.5rem' }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <Search className="search-icon" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#64748B', width: '16px' }} />
             <input
@@ -32,52 +41,109 @@ export default function Header({ searchTerm, setSearchTerm, onOpenAuth, currentU
           </button>
         </div>
 
-        {/* Navigation Links + User Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontSize: '0.85rem', fontWeight: 500 }}>
+        {/* Navigation Links + Cart + User Pill */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '1.1rem', fontSize: '0.85rem', fontWeight: 500 }}>
             <a
               href="/"
               onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
               style={{ textDecoration: 'none', color: currentView === 'catalog' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'catalog' ? 700 : 500 }}
             >
-              <Home size={16} /> Home
+              <Home size={15} /> Home
             </a>
+
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onNavigate('repeat'); }}
               style={{ textDecoration: 'none', color: currentView === 'repeat' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'repeat' ? 700 : 500 }}
             >
-              <RotateCcw size={16} /> Repeat
+              <RotateCcw size={15} /> Repeat
             </a>
+
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onNavigate('wallet'); }}
               style={{ textDecoration: 'none', color: currentView === 'wallet' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'wallet' ? 700 : 500 }}
             >
-              <Wallet size={16} /> Wallet
+              <Wallet size={15} /> Wallet
             </a>
+
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); onNavigate('challenges'); }}
+              style={{ textDecoration: 'none', color: currentView === 'challenges' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'challenges' ? 700 : 500 }}
+            >
+              <Zap size={15} /> Challenges
+            </a>
+
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); onNavigate('seller'); }}
+              style={{ textDecoration: 'none', color: currentView === 'seller' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'seller' ? 700 : 500 }}
+            >
+              <Building size={15} /> Seller Portal
+            </a>
+
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onNavigate('partner'); }}
               style={{ textDecoration: 'none', color: currentView === 'partner' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'partner' ? 700 : 500 }}
             >
-              <Handshake size={16} /> Partner
+              <Handshake size={15} /> Partner
             </a>
+
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}
               style={{ textDecoration: 'none', color: currentView === 'profile' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'profile' ? 700 : 500 }}
             >
-              <User size={16} /> Profile
+              <User size={15} /> Profile
             </a>
           </nav>
 
-          {/* Logged in User Pill Button matching user screenshot (e.g. aditi) */}
+          {/* Cart Trigger with Counter Badge */}
+          <button
+            onClick={onOpenCart}
+            style={{
+              position: 'relative',
+              background: '#F1F5F9',
+              border: '1px solid #E2E8F0',
+              padding: '0.5rem 0.85rem',
+              borderRadius: '9999px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              cursor: 'pointer',
+              color: '#0F172A',
+              fontWeight: 700,
+              fontSize: '0.85rem'
+            }}
+            title="View Cart"
+          >
+            <ShoppingCart size={17} style={{ color: '#00A3FF' }} />
+            <span>Cart</span>
+            {cartCount > 0 && (
+              <span
+                style={{
+                  background: '#00A3FF',
+                  color: 'white',
+                  borderRadius: '9999px',
+                  padding: '0.1rem 0.45rem',
+                  fontSize: '0.7rem',
+                  fontWeight: 800
+                }}
+              >
+                {cartCount}
+              </span>
+            )}
+          </button>
+
+          {/* User Button */}
           <button
             onClick={() => onNavigate('profile')}
-            style={{ background: '#00A3FF', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(0,163,255,0.25)' }}
+            style={{ background: '#00A3FF', color: 'white', border: 'none', padding: '0.5rem 1.15rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(0,163,255,0.25)' }}
           >
-            <User size={16} />
+            <User size={15} />
             <span>{currentUser ? currentUser.name.toLowerCase() : 'aditi'}</span>
           </button>
         </div>

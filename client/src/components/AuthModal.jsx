@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Mail, User, Building } from 'lucide-react';
+import { X, Lock, Mail, User, Building, AlertCircle } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -8,6 +8,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     email: '',
     password: '',
     businessName: '',
+    gstin: '',
     role: 'buyer'
   });
   const [errorMsg, setErrorMsg] = useState('');
@@ -31,6 +32,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       setLoading(false);
 
       if (data.success) {
+        if (data.token) {
+          localStorage.setItem('cr_token', data.token);
+        }
         onLoginSuccess(data.user);
         onClose();
       } else {
@@ -57,24 +61,67 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         </p>
 
         {errorMsg && (
-          <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '0.6rem 0.85rem', borderRadius: '0.5rem', fontSize: '0.85rem', marginBottom: '1rem' }}>
-            {errorMsg}
+          <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '0.6rem 0.85rem', borderRadius: '0.5rem', fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <AlertCircle size={16} />
+            <span>{errorMsg}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           {isRegister && (
-            <div className="form-group">
-              <label className="form-label">Full Name / Contact Person</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Ramesh Patel"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
+            <>
+              {/* Role Picker */}
+              <div className="form-group">
+                <label className="form-label">I want to register as:</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: 'buyer' })}
+                    style={{
+                      padding: '0.6rem',
+                      borderRadius: '0.5rem',
+                      border: `1.5px solid ${formData.role === 'buyer' ? '#00A3FF' : '#E2E8F0'}`,
+                      background: formData.role === 'buyer' ? '#EFF6FF' : 'white',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      color: formData.role === 'buyer' ? '#0F3B9A' : '#64748B',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Wholesale Buyer
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: 'supplier' })}
+                    style={{
+                      padding: '0.6rem',
+                      borderRadius: '0.5rem',
+                      border: `1.5px solid ${formData.role === 'supplier' ? '#00A3FF' : '#E2E8F0'}`,
+                      background: formData.role === 'supplier' ? '#EFF6FF' : 'white',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      color: formData.role === 'supplier' ? '#0F3B9A' : '#64748B',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Manufacturer
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Full Name / Contact Person</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ramesh Patel"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+            </>
           )}
 
           <div className="form-group">
@@ -102,16 +149,29 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           </div>
 
           {isRegister && (
-            <div className="form-group">
-              <label className="form-label">Business / Firm Name (Optional)</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Patel Enterprises Surat"
-                value={formData.businessName}
-                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-              />
-            </div>
+            <>
+              <div className="form-group">
+                <label className="form-label">Business / Firm Name (Optional)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Patel Enterprises Surat"
+                  value={formData.businessName}
+                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">GSTIN (Optional)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="24AAAAA0000A1Z5"
+                  value={formData.gstin}
+                  onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
+                />
+              </div>
+            </>
           )}
 
           <button

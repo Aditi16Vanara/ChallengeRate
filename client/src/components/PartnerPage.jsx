@@ -1,37 +1,66 @@
 import React, { useState } from 'react';
-import { Handshake, CheckCircle2, Shield, TrendingUp, Truck } from 'lucide-react';
+import { Handshake, CheckCircle2, Shield, TrendingUp, Truck, AlertCircle } from 'lucide-react';
 
-export default function PartnerPage() {
+export default function PartnerPage({ currentUser }) {
   const [formData, setFormData] = useState({
-    companyName: '',
-    gstin: '',
+    companyName: currentUser && currentUser.businessName ? currentUser.businessName : 'Surat Textiles Mills Pvt Ltd',
+    gstin: currentUser && currentUser.gstin ? currentUser.gstin : '24AAAAA0000A1Z5',
     category: 'Textiles',
-    city: 'Surat',
-    state: 'Gujarat',
-    phone: '',
-    email: ''
+    city: currentUser && currentUser.address ? currentUser.address.city : 'Surat',
+    state: currentUser && currentUser.address ? currentUser.address.state : 'Gujarat',
+    phone: currentUser ? currentUser.phone || '+91 98765 43210' : '+91 98765 43210',
+    email: currentUser ? currentUser.email : 'aditi@business.com'
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('/api/auth/partners/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMsg(data.message || 'Failed to submit partner application.');
+      }
+    } catch (err) {
+      setLoading(false);
+      setErrorMsg('Network error submitting application.');
+    }
   };
 
   return (
-    <div style={{ maxW: '1100px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
+    <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
       {/* Hero Header */}
-      <div style={{ textCenter: 'center', marginBottom: '3rem', textAlign: 'center' }}>
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#EFF6FF', color: '#00A3FF', padding: '0.35rem 1rem', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem' }}>
           <Handshake size={16} /> Manufacturer Partner Program
         </div>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
           Sell Directly to Verified Wholesale Buyers Across India
         </h1>
-        <p style={{ color: '#64748B', fontSize: '1.05rem', maxW: '750px', margin: '0.75rem auto 0' }}>
+        <p style={{ color: '#64748B', fontSize: '1.05rem', maxWidth: '750px', margin: '0.75rem auto 0' }}>
           Join 2,500+ Indian manufacturers on ChallengeRate. Zero listing fees, guaranteed escrow payments, and pan-India logistics support.
         </p>
       </div>
+
+      {errorMsg && (
+        <div style={{ maxWidth: '700px', margin: '0 auto 1.5rem', background: '#FEE2E2', color: '#991B1B', padding: '0.75rem 1rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <AlertCircle size={18} />
+          <span>{errorMsg}</span>
+        </div>
+      )}
 
       {/* Grid: Benefits & Application Form */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr minmax(300px, 460px)', gap: '2.5rem' }}>
@@ -44,7 +73,7 @@ export default function PartnerPage() {
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F172A' }}>Guaranteed Payment Protection</h3>
               <p style={{ color: '#64748B', fontSize: '0.875rem', marginTop: '0.3rem' }}>
-                All wholesale orders are backed by ChallengeRate Escrow. Get paid immediately upon dispatch confirmation.
+                All wholesale orders are backed by ChallengeRate Escrow. Get paid immediately upon verified delivery.
               </p>
             </div>
           </div>
@@ -79,9 +108,9 @@ export default function PartnerPage() {
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
               <CheckCircle2 size={48} style={{ color: '#10B981', margin: '0 auto 1rem' }} />
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0F172A' }}>Application Submitted!</h3>
-              <p style={{ color: '#64748B', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                Our team will verify your GSTIN and contact you within 24 hours to set up your manufacturer catalog.
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0F172A' }}>Application Stored in Database!</h3>
+              <p style={{ color: '#64748B', fontSize: '0.9rem', marginTop: '0.5rem', lineHeight: 1.5 }}>
+                Your manufacturing unit verification request has been saved with status <strong>PENDING</strong> in MongoDB. Once approved, you gain access to the Seller Portal to publish products.
               </p>
             </div>
           ) : (
@@ -94,38 +123,39 @@ export default function PartnerPage() {
               </p>
 
               <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, marginBottom: '0.35rem' }}>Company / Firm Name</label>
+                <div className="form-group">
+                  <label className="form-label">Company / Firm Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Surat Textiles Mills Pvt Ltd"
                     value={formData.companyName}
                     onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '0.5rem', border: '1px solid #CBD5E1', fontSize: '0.875rem' }}
+                    className="form-input"
                   />
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, marginBottom: '0.35rem' }}>GSTIN Number</label>
+                <div className="form-group">
+                  <label className="form-label">GSTIN Number</label>
                   <input
                     type="text"
                     required
                     placeholder="24AAAAA0000A1Z5"
                     value={formData.gstin}
                     onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '0.5rem', border: '1px solid #CBD5E1', fontSize: '0.875rem' }}
+                    className="form-input"
                   />
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, marginBottom: '0.35rem' }}>Primary Product Category</label>
+                <div className="form-group">
+                  <label className="form-label">Primary Product Category</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '0.5rem', border: '1px solid #CBD5E1', fontSize: '0.875rem' }}
+                    className="form-input"
                   >
                     <option value="Textiles">Textiles & Garments</option>
+                    <option value="Agro & Beverages">Agro & Beverages (Water, Juices)</option>
                     <option value="Supari & Agro">Supari, Spices & Agro</option>
                     <option value="Agro & Fertilizer">Organic Fertilizers</option>
                     <option value="Chemicals & Polymers">Chemicals & Plastic Resins</option>
@@ -135,34 +165,36 @@ export default function PartnerPage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, marginBottom: '0.35rem' }}>City</label>
+                    <label className="form-label">City</label>
                     <input
                       type="text"
                       required
                       placeholder="Surat"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      style={{ width: '100%', padding: '0.65rem', borderRadius: '0.5rem', border: '1px solid #CBD5E1', fontSize: '0.875rem' }}
+                      className="form-input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, marginBottom: '0.35rem' }}>State</label>
+                    <label className="form-label">State</label>
                     <input
                       type="text"
                       required
                       placeholder="Gujarat"
                       value={formData.state}
                       onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                      style={{ width: '100%', padding: '0.65rem', borderRadius: '0.5rem', border: '1px solid #CBD5E1', fontSize: '0.875rem' }}
+                      className="form-input"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  style={{ width: '100%', background: '#00A3FF', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '9999px', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer' }}
+                  disabled={loading}
+                  className="btn-primary"
+                  style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}
                 >
-                  Submit Partner Application
+                  {loading ? 'Submitting Application...' : 'Submit Partner Application'}
                 </button>
               </form>
             </>
