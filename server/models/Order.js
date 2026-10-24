@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
-  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  product: { type: mongoose.Schema.Types.Mixed, ref: 'Product' },
   title: { type: String, required: true },
   image: { type: String },
   quantity: { type: Number, required: true },
@@ -25,7 +25,7 @@ const statusHistorySchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   orderNumber: { type: String, required: true, unique: true },
-  buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  buyer: { type: mongoose.Schema.Types.Mixed, ref: 'User' },
   buyerName: { type: String, required: true },
   buyerEmail: { type: String, required: true },
   buyerPhone: { type: String },

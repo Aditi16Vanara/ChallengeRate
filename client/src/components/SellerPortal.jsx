@@ -291,7 +291,15 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
             {products.map(p => (
               <div key={p._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid #E2E8F0', borderRadius: '0.85rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <img src={p.image} alt={p.title} style={{ width: '60px', height: '60px', borderRadius: '0.5rem', objectFit: 'cover' }} />
+                  <img
+                    src={p.image}
+                    alt={p.title}
+                    style={{ width: '60px', height: '60px', borderRadius: '0.5rem', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300';
+                    }}
+                  />
                   <div>
                     <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>{p.title}</h4>
                     <div style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '0.2rem' }}>

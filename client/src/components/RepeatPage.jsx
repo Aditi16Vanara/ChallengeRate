@@ -75,7 +75,8 @@ export default function RepeatPage({ currentUser, onReorderToCart, onTrackOrder 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   {firstItem && (
                     <img
-                      src={firstItem.image || 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&q=80&w=300'}
+                      src={firstItem.image || 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300'}
+                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300'; }}
                       alt={firstItem.title}
                       style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '0.75rem', background: '#F1F5F9' }}
                     />

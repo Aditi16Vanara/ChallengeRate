@@ -23,6 +23,10 @@ export default function ProductDetail({ product, onBack, onOrderClick, onChallen
               src={product.image}
               alt={product.title}
               style={{ width: '100%', height: '400px', objectFit: 'cover', display: 'block' }}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=800';
+              }}
             />
             {/* Views counter badge */}
             <div style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.775rem', fontWeight: 600, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '0.35rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>

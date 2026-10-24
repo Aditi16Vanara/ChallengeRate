@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Wallet = require('../models/Wallet');
 const WalletTransaction = require('../models/WalletTransaction');
 const User = require('../models/User');
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
 
     if (getMongoStatus()) {
       let targetUser = null;
-      if (userId) {
+      if (userId && mongoose.Types.ObjectId.isValid(userId)) {
         targetUser = await User.findById(userId);
       } else if (userEmail) {
         targetUser = await User.findOne({ email: userEmail.toLowerCase() });
@@ -98,7 +99,7 @@ router.post('/topup', async (req, res) => {
 
     if (getMongoStatus()) {
       let targetUser = null;
-      if (userId) targetUser = await User.findById(userId);
+      if (userId && mongoose.Types.ObjectId.isValid(userId)) targetUser = await User.findById(userId);
       else if (userEmail) targetUser = await User.findOne({ email: userEmail.toLowerCase() });
       if (!targetUser) targetUser = await User.findOne();
 
@@ -158,7 +159,7 @@ router.post('/credit/repay', async (req, res) => {
 
     if (getMongoStatus()) {
       let user = null;
-      if (userId) user = await User.findById(userId);
+      if (userId && mongoose.Types.ObjectId.isValid(userId)) user = await User.findById(userId);
       if (!user) user = await User.findOne();
 
       if (!user) return res.status(404).json({ success: false, message: 'User not found.' });

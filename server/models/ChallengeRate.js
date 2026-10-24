@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 const challengeRateSchema = new mongoose.Schema({
   challengeId: { type: String, required: true, unique: true },
-  buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  buyer: { type: mongoose.Schema.Types.Mixed, ref: 'User' },
   buyerName: { type: String, required: true },
   buyerEmail: { type: String, required: true },
   buyerPhone: { type: String },
   supplierName: { type: String, required: true },
-  supplierId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  supplierId: { type: mongoose.Schema.Types.Mixed, ref: 'User' },
+  product: { type: mongoose.Schema.Types.Mixed, ref: 'Product' },
   productTitle: { type: String, required: true },
   productImage: { type: String },
   unit: { type: String, default: 'Unit' },

@@ -53,9 +53,13 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('cr_user');
-      return saved ? JSON.parse(saved) : { id: 'usr_demo', name: 'aditi', email: 'aditi@business.com', role: 'buyer' };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.id && parsed.id !== 'usr_demo') return parsed;
+      }
+      return { id: '6aabc1923bd7ad806eabb81d', name: 'aditi', email: 'aditi@gmail.com', role: 'buyer' };
     } catch {
-      return { id: 'usr_demo', name: 'aditi', email: 'aditi@business.com', role: 'buyer' };
+      return { id: '6aabc1923bd7ad806eabb81d', name: 'aditi', email: 'aditi@gmail.com', role: 'buyer' };
     }
   });
 

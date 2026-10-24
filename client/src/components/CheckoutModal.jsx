@@ -116,7 +116,7 @@ export default function CheckoutModal({
         onOrderSuccess(data.data);
         onClose();
       } else {
-        setErrorMsg(data.message || 'Failed to place order.');
+        setErrorMsg(data.message || data.error || 'Failed to place order.');
       }
     } catch (err) {
       setLoading(false);

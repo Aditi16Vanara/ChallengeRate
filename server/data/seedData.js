@@ -4,7 +4,7 @@ const initialProducts = [
     title: "Water 200 ML. ( Clonex )",
     category: "Agro & Beverages",
     description: "Pure purified drinking water bottles in bulk packaging. Standardized 200ml bottles for commercial events, catering, and wholesale.",
-    image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=800",
     moq: "35 bottle",
     moqNumber: 35,
     orderMultipleNumber: 35,

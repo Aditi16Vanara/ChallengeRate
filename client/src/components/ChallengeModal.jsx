@@ -107,7 +107,15 @@ export default function ChallengeModal({
 
         {/* Product Reference Card */}
         <div style={{ display: 'flex', gap: '1rem', background: '#F8FAFC', padding: '0.85rem', borderRadius: '0.85rem', border: '1px solid #E2E8F0', marginBottom: '1.25rem' }}>
-          <img src={product.image} alt={product.title} style={{ width: '65px', height: '65px', borderRadius: '0.5rem', objectFit: 'cover' }} />
+          <img
+            src={product.image}
+            alt={product.title}
+            style={{ width: '65px', height: '65px', borderRadius: '0.5rem', objectFit: 'cover' }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300';
+            }}
+          />
           <div>
             <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0F172A', margin: 0 }}>{product.title}</h4>
             <div style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '0.2rem' }}>

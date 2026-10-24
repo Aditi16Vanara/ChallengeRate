@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
@@ -49,12 +50,16 @@ router.post('/', async (req, res) => {
 
     for (const item of items) {
       let product = null;
-      if (getMongoStatus()) {
-        product = await Product.findById(item.productId || item.product);
+      const pid = item.productId || item.product;
+      if (getMongoStatus() && pid && mongoose.Types.ObjectId.isValid(pid)) {
+        product = await Product.findById(pid);
+      }
+      if (!product && getMongoStatus() && item.title) {
+        product = await Product.findOne({ title: { $regex: new RegExp(item.title.trim(), 'i') } });
       }
       if (!product) {
         const { initialProducts } = require('../data/seedData');
-        product = initialProducts.find(p => p._id === (item.productId || item.product));
+        product = initialProducts.find(p => p._id === pid || (item.title && p.title.toLowerCase() === item.title.toLowerCase()));
       }
 
       if (!product) {
@@ -136,6 +141,31 @@ router.post('/', async (req, res) => {
 
     const totalAmount = Math.round((subtotal + gstTotal) * 100) / 100;
 
+    // Resolve buyer user in MongoDB safely
+    let resolvedBuyer = null;
+    if (getMongoStatus()) {
+      if (buyerId && mongoose.Types.ObjectId.isValid(buyerId)) {
+        resolvedBuyer = await User.findById(buyerId);
+      }
+      if (!resolvedBuyer && buyerEmail) {
+        resolvedBuyer = await User.findOne({ email: buyerEmail.toLowerCase().trim() });
+      }
+      if (!resolvedBuyer) {
+        resolvedBuyer = await User.findOne({ role: 'buyer' });
+      }
+      if (!resolvedBuyer) {
+        resolvedBuyer = await User.create({
+          name: buyerName || 'Aditi Vanara',
+          email: (buyerEmail || 'aditi@gmail.com').toLowerCase().trim(),
+          password: 'Password123!',
+          role: 'buyer',
+          creditLimit: 50000,
+          creditUsed: 0,
+          isCreditApproved: true
+        });
+      }
+    }
+
     // Payment validation
     let paymentStatus = 'ESCROW_HELD';
     let dueDate = null;
@@ -145,27 +175,27 @@ router.post('/', async (req, res) => {
       paymentStatus = 'CREDIT_PENDING';
 
       // Check credit limit if user exists
-      if (getMongoStatus() && buyerId) {
-        const user = await User.findById(buyerId);
-        if (user) {
-          const availableCredit = (user.creditLimit || 50000) - (user.creditUsed || 0);
-          if (totalAmount > availableCredit) {
-            return res.status(400).json({
-              success: false,
-              message: `Order amount (₹${totalAmount}) exceeds your available 10-day credit limit (₹${availableCredit}).`
-            });
-          }
-          user.creditUsed = (user.creditUsed || 0) + totalAmount;
-          await user.save();
-        }
-      }
-    } else if (paymentMethod === 'WALLET') {
-      if (getMongoStatus() && buyerId) {
-        const wallet = await Wallet.findOne({ user: buyerId });
-        if (!wallet || wallet.balance < totalAmount) {
+      if (resolvedBuyer) {
+        const availableCredit = (resolvedBuyer.creditLimit || 50000) - (resolvedBuyer.creditUsed || 0);
+        if (totalAmount > availableCredit) {
           return res.status(400).json({
             success: false,
-            message: `Insufficient wallet balance (Available: ₹${wallet ? wallet.balance : 0}, Required: ₹${totalAmount}). Please top up first.`
+            message: `Order amount (₹${totalAmount}) exceeds your available 10-day credit limit (₹${availableCredit}).`
+          });
+        }
+        resolvedBuyer.creditUsed = (resolvedBuyer.creditUsed || 0) + totalAmount;
+        await resolvedBuyer.save();
+      }
+    } else if (paymentMethod === 'WALLET') {
+      if (resolvedBuyer) {
+        let wallet = await Wallet.findOne({ user: resolvedBuyer._id });
+        if (!wallet) {
+          wallet = await Wallet.create({ user: resolvedBuyer._id, balance: 50000, escrowHeld: 0 });
+        }
+        if (wallet.balance < totalAmount) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient wallet balance (Available: ₹${wallet.balance}, Required: ₹${totalAmount}). Please top up first.`
           });
         }
         wallet.balance -= totalAmount;
@@ -174,7 +204,7 @@ router.post('/', async (req, res) => {
 
         await WalletTransaction.create({
           wallet: wallet._id,
-          user: buyerId,
+          user: resolvedBuyer._id,
           type: 'ORDER_DEBIT',
           amount: totalAmount,
           balanceAfter: wallet.balance,
@@ -189,9 +219,9 @@ router.post('/', async (req, res) => {
 
     const newOrderData = {
       orderNumber,
-      buyer: buyerId || '6aabc0943bd7ad806eabb799',
-      buyerName: buyerName || 'Aditi Vanara',
-      buyerEmail: buyerEmail || 'aditi@business.com',
+      buyer: resolvedBuyer ? resolvedBuyer._id : (buyerId || 'usr_buyer'),
+      buyerName: buyerName || (resolvedBuyer ? resolvedBuyer.name : 'Aditi Vanara'),
+      buyerEmail: buyerEmail || (resolvedBuyer ? resolvedBuyer.email : 'aditi@gmail.com'),
       buyerPhone: buyerPhone || shippingAddress.phone || '+91 98765 43210',
       supplierName: primarySupplier,
       items: processedItems,
@@ -240,7 +270,12 @@ router.post('/', async (req, res) => {
       data: mockOrder
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('Order creation error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to place order: ' + err.message,
+      error: err.message
+    });
   }
 });
 

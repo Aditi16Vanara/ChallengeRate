@@ -125,7 +125,15 @@ export default function CartDrawer({
 
                 return (
                   <div key={item._id} className="cart-item-card">
-                    <img src={item.image} alt={item.title} className="cart-item-img" />
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="cart-item-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300';
+                      }}
+                    />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <h4 style={{ fontSize: '0.925rem', fontWeight: 700, color: '#0F172A', margin: 0, lineHeight: 1.3 }}>

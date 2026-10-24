@@ -115,7 +115,15 @@ export default function ChallengesPage({ currentUser, onOrderNegotiatedDeal }) {
             <div key={chl._id || chl.challengeId} style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: '1.25rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '1rem' }}>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <img src={chl.productImage} alt={chl.productTitle} style={{ width: '65px', height: '65px', objectFit: 'cover', borderRadius: '0.65rem' }} />
+                  <img
+                    src={chl.productImage}
+                    alt={chl.productTitle}
+                    style={{ width: '65px', height: '65px', objectFit: 'cover', borderRadius: '0.65rem' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300';
+                    }}
+                  />
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#00A3FF', background: '#F0F9FF', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>

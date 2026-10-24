@@ -26,7 +26,15 @@ export default function ProductCard({ product, onChallengeRate, onSelectProduct,
     >
       {/* Top Section */}
       <div className="card-top">
-        <img src={product.image} alt={product.title} className="product-thumb" />
+        <img
+          src={product.image}
+          alt={product.title}
+          className="product-thumb"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=800';
+          }}
+        />
         <div className="product-info">
           <div>
             <div className="category-tag">{product.category}</div>

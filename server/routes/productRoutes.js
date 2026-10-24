@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const { getMongoStatus } = require('../config/db');
 const { initialProducts, seedDatabase } = require('../data/seedData');
@@ -62,7 +63,7 @@ router.get('/', async (req, res) => {
 // GET /api/products/:id
 router.get('/:id', async (req, res) => {
   try {
-    if (getMongoStatus()) {
+    if (getMongoStatus() && mongoose.Types.ObjectId.isValid(req.params.id)) {
       const product = await Product.findById(req.params.id);
       if (product) return res.json({ success: true, data: product });
     }
@@ -90,11 +91,14 @@ router.post('/validate-cart', async (req, res) => {
 
     for (const item of items) {
       let product = null;
-      if (getMongoStatus()) {
+      if (getMongoStatus() && item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
         product = await Product.findById(item.productId);
       }
+      if (!product && getMongoStatus() && item.title) {
+        product = await Product.findOne({ title: { $regex: new RegExp(item.title.trim(), 'i') } });
+      }
       if (!product) {
-        product = initialProducts.find(p => p._id === item.productId);
+        product = initialProducts.find(p => p._id === item.productId || (item.title && p.title.toLowerCase() === item.title.toLowerCase()));
       }
 
       if (!product) {
@@ -218,7 +222,7 @@ router.post('/', async (req, res) => {
       title,
       category,
       description: description || 'High quality wholesale product sourced directly from Indian verified manufacturers.',
-      image: image || 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&q=80&w=800',
+      image: image || 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&q=80&w=800',
       moq: moq || minOrder || '100 Units',
       priceRange: priceRange || `₹${basePrice} / ${unit}`,
       basePrice: Number(basePrice),

@@ -142,7 +142,15 @@ export default function OrderTrackingModal({ isOpen, onClose, order, onDeliveryC
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {order.items && order.items.map((it, idx) => (
                 <div key={idx} style={{ display: 'flex', gap: '0.75rem', background: 'white', border: '1px solid #E2E8F0', borderRadius: '0.6rem', padding: '0.6rem' }}>
-                  <img src={it.image} alt={it.title} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '0.4rem' }} />
+                  <img
+                    src={it.image}
+                    alt={it.title}
+                    style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '0.4rem' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://images.unsplash.com/photo-1559839914-17aae19cec71?auto=format&fit=crop&q=80&w=300';
+                    }}
+                  />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {it.title}
