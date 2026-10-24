@@ -56,6 +56,9 @@ router.get('/', async (req, res) => {
     if (category && category !== 'All') {
       filtered = filtered.filter(p => p.category.toLowerCase().includes(category.toLowerCase()));
     }
+    if (seller) {
+      filtered = filtered.filter(p => p.supplier && p.supplier.name && p.supplier.name.toLowerCase().includes(seller.toLowerCase()));
+    }
     if (q) {
       const term = q.toLowerCase();
       filtered = filtered.filter(p =>

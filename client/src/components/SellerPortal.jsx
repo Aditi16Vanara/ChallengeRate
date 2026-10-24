@@ -44,12 +44,17 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
     const roleHeader = { 'x-user-role': currentUser ? currentUser.role : 'supplier' };
 
     Promise.all([
-      fetch('/api/products').then(res => res.json()),
+      fetch(`/api/products?seller=${encodeURIComponent(sellerName)}`).then(res => res.json()),
       fetch(`/api/orders/seller-orders?supplierName=${encodeURIComponent(sellerName)}`, { headers: roleHeader }).then(res => res.json()),
       fetch(`/api/challenges/manufacturer?supplierName=${encodeURIComponent(sellerName)}`, { headers: roleHeader }).then(res => res.json())
     ])
       .then(([prodData, ordData, chlData]) => {
-        if (prodData.success) setProducts(prodData.data);
+        if (prodData.success) {
+          const myProducts = prodData.data.filter(p =>
+            !sellerName || (p.supplier && p.supplier.name && p.supplier.name.toLowerCase().includes(sellerName.toLowerCase()))
+          );
+          setProducts(myProducts);
+        }
         if (ordData.success) setOrders(ordData.data);
         if (chlData.success) setChallenges(chlData.data);
         setLoading(false);
