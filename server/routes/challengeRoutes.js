@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const ChallengeRate = require('../models/ChallengeRate');
 const Product = require('../models/Product');
 const { getMongoStatus } = require('../config/db');
@@ -26,12 +27,15 @@ router.post('/', async (req, res) => {
     }
 
     let product = null;
-    if (getMongoStatus()) {
+    if (getMongoStatus() && productId && mongoose.Types.ObjectId.isValid(productId)) {
       product = await Product.findById(productId);
+    }
+    if (!product && getMongoStatus() && req.body.productTitle) {
+      product = await Product.findOne({ title: { $regex: new RegExp(req.body.productTitle.trim(), 'i') } });
     }
     if (!product) {
       const { initialProducts } = require('../data/seedData');
-      product = initialProducts.find(p => p._id === productId);
+      product = initialProducts.find(p => p._id === productId || (req.body.productTitle && p.title.toLowerCase() === req.body.productTitle.toLowerCase()));
     }
 
     if (!product) {
@@ -144,7 +148,13 @@ router.put('/:id/respond', async (req, res) => {
     const newStatus = statusMap[action];
 
     if (getMongoStatus()) {
-      const challenge = await ChallengeRate.findById(req.params.id);
+      let challenge = null;
+      if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+        challenge = await ChallengeRate.findById(req.params.id);
+      }
+      if (!challenge) {
+        challenge = await ChallengeRate.findOne({ challengeId: req.params.id });
+      }
       if (!challenge) return res.status(404).json({ success: false, message: 'Challenge request not found.' });
 
       challenge.status = newStatus;
@@ -190,7 +200,13 @@ router.put('/:id/buyer-respond', async (req, res) => {
     const newStatus = action === 'ACCEPT' ? 'BUYER_ACCEPTED' : 'BUYER_REJECTED';
 
     if (getMongoStatus()) {
-      const challenge = await ChallengeRate.findById(req.params.id);
+      let challenge = null;
+      if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+        challenge = await ChallengeRate.findById(req.params.id);
+      }
+      if (!challenge) {
+        challenge = await ChallengeRate.findOne({ challengeId: req.params.id });
+      }
       if (!challenge) return res.status(404).json({ success: false, message: 'Challenge request not found.' });
 
       challenge.status = newStatus;

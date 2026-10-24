@@ -32,7 +32,13 @@ export default function CheckoutModal({
   useEffect(() => {
     let isMounted = true;
     const payload = {
-      items: items.map(i => ({ productId: i._id, quantity: i.quantity }))
+      items: items.map(i => ({
+        productId: i._id,
+        quantity: i.quantity,
+        title: i.title,
+        unitPrice: i.currentUnitPrice || i.basePrice,
+        isNegotiated: !!i.isNegotiated
+      }))
     };
 
     fetch('/api/products/validate-cart', {
@@ -53,7 +59,8 @@ export default function CheckoutModal({
       });
 
     // Fetch live wallet and credit limits
-    fetch('/api/wallet')
+    const userEmail = currentUser ? currentUser.email : 'aditi@business.com';
+    fetch(`/api/wallet?userEmail=${encodeURIComponent(userEmail)}`)
       .then(res => res.json())
       .then(data => {
         if (isMounted && data.success) {
@@ -97,7 +104,13 @@ export default function CheckoutModal({
       buyerName: shippingAddress.recipientName,
       buyerEmail: currentUser ? currentUser.email : 'aditi@business.com',
       buyerPhone: shippingAddress.phone,
-      items: items.map(i => ({ productId: i._id, quantity: i.quantity, title: i.title })),
+      items: items.map(i => ({
+        productId: i._id,
+        quantity: i.quantity,
+        title: i.title,
+        unitPrice: i.currentUnitPrice || i.basePrice,
+        isNegotiated: !!i.isNegotiated
+      })),
       shippingAddress,
       gstin,
       paymentMethod

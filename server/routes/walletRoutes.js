@@ -151,7 +151,7 @@ router.post('/topup', async (req, res) => {
 // POST /api/wallet/credit/repay (Repay outstanding 10-day credit)
 router.post('/credit/repay', async (req, res) => {
   try {
-    const { userId, amount, repaymentMethod } = req.body;
+    const { userId, userEmail, amount, repaymentMethod } = req.body;
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
       return res.status(400).json({ success: false, message: 'Invalid repayment amount.' });
@@ -160,6 +160,7 @@ router.post('/credit/repay', async (req, res) => {
     if (getMongoStatus()) {
       let user = null;
       if (userId && mongoose.Types.ObjectId.isValid(userId)) user = await User.findById(userId);
+      else if (userEmail) user = await User.findOne({ email: userEmail.toLowerCase() });
       if (!user) user = await User.findOne();
 
       if (!user) return res.status(404).json({ success: false, message: 'User not found.' });

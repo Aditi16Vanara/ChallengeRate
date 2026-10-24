@@ -73,6 +73,7 @@ export default function WalletPage({ currentUser }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: currentUser ? currentUser.id : undefined,
+          userEmail: currentUser ? currentUser.email : 'aditi@business.com',
           amount: val
         })
       });

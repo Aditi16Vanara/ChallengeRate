@@ -54,7 +54,7 @@ export default function CartDrawer({
     const unitPrice = getClientTierPrice(item, qty);
     const itemSub = unitPrice * qty;
     const gstRateNum = extractStep(item.gstRate, 5);
-    const itemGst = (itemSub * gstRateNum) / 100;
+    const itemGst = Math.round(((itemSub * gstRateNum) / 100) * 100) / 100;
     subtotal += itemSub;
     gstTotal += itemGst;
 
@@ -67,7 +67,9 @@ export default function CartDrawer({
     };
   });
 
-  const grandTotal = subtotal + gstTotal;
+  subtotal = Math.round(subtotal * 100) / 100;
+  gstTotal = Math.round(gstTotal * 100) / 100;
+  const grandTotal = Math.round((subtotal + gstTotal) * 100) / 100;
 
   return (
     <div className="cart-backdrop" onClick={onClose}>

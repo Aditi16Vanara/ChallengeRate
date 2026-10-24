@@ -119,11 +119,14 @@ router.post('/validate-cart', async (req, res) => {
         errors.push(`"${product.title}" requires a minimum order of ${product.minOrder || product.moq} (requested ${item.quantity}).`);
       }
 
-      // Calculate unit price from tiers
+      // Calculate unit price from tiers or negotiated rate
       let unitPrice = product.basePrice;
       let appliedTier = 'Base Tier';
 
-      if (product.calculateTierPrice) {
+      if (item.isNegotiated && item.unitPrice) {
+        unitPrice = Number(item.unitPrice);
+        appliedTier = `Negotiated Rate (₹${unitPrice}/${product.unit || 'unit'})`;
+      } else if (product.calculateTierPrice) {
         unitPrice = product.calculateTierPrice(item.quantity);
       } else if (product.tiers && product.tiers.length > 0) {
         for (const tier of product.tiers) {

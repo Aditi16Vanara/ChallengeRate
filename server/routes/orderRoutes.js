@@ -78,11 +78,14 @@ router.post('/', async (req, res) => {
         });
       }
 
-      // Calculate unit price from tiers
+      // Calculate unit price from tiers or negotiated rate
       let unitPrice = product.basePrice;
       let appliedTier = 'Base Tier';
 
-      if (product.calculateTierPrice) {
+      if (item.isNegotiated && item.unitPrice) {
+        unitPrice = Number(item.unitPrice);
+        appliedTier = `Negotiated Rate (Challenge Accepted: ₹${unitPrice}/${product.unit || 'unit'})`;
+      } else if (product.calculateTierPrice) {
         unitPrice = product.calculateTierPrice(item.quantity);
       } else if (product.tiers && product.tiers.length > 0) {
         for (const tier of product.tiers) {
@@ -319,7 +322,13 @@ router.get('/seller-orders', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     if (getMongoStatus()) {
-      const order = await Order.findById(req.params.id);
+      let order = null;
+      if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+        order = await Order.findById(req.params.id);
+      }
+      if (!order) {
+        order = await Order.findOne({ orderNumber: req.params.id });
+      }
       if (order) return res.json({ success: true, data: order });
     }
     const order = inMemoryOrders.find(o => o._id === req.params.id || o.orderNumber === req.params.id);
@@ -349,7 +358,13 @@ router.put('/:id/status', async (req, res) => {
     }
 
     if (getMongoStatus()) {
-      const order = await Order.findById(req.params.id);
+      let order = null;
+      if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+        order = await Order.findById(req.params.id);
+      }
+      if (!order) {
+        order = await Order.findOne({ orderNumber: req.params.id });
+      }
       if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
       order.orderStatus = status;
@@ -386,7 +401,13 @@ router.put('/:id/status', async (req, res) => {
 router.post('/:id/confirm-delivery', async (req, res) => {
   try {
     if (getMongoStatus()) {
-      const order = await Order.findById(req.params.id);
+      let order = null;
+      if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+        order = await Order.findById(req.params.id);
+      }
+      if (!order) {
+        order = await Order.findOne({ orderNumber: req.params.id });
+      }
       if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
       order.orderStatus = 'DELIVERED';
