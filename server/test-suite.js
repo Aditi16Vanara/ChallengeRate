@@ -333,6 +333,11 @@ async function runTests() {
     const stockData = await stockRes.json();
     assert.strictEqual(stockData.success, true);
     assert.strictEqual(stockData.inStock, false);
+
+    // Clean up test product so catalog stays clean without duplicates
+    if (data.data && data.data._id) {
+      await fetch(`${API_BASE}/products/${data.data._id}`, { method: 'DELETE' });
+    }
   });
 
   console.log('\n====================================================');

@@ -38,7 +38,17 @@ router.get('/', async (req, res) => {
         ];
       }
       const products = await Product.find(query).sort({ createdAt: -1 });
-      return res.json({ success: true, count: products.length, data: products, source: 'MongoDB' });
+      // Deduplicate by title to ensure clean unique catalog display
+      const uniqueProducts = [];
+      const seenTitles = new Set();
+      for (const p of products) {
+        const normTitle = p.title.trim().toLowerCase();
+        if (!seenTitles.has(normTitle)) {
+          seenTitles.add(normTitle);
+          uniqueProducts.push(p);
+        }
+      }
+      return res.json({ success: true, count: uniqueProducts.length, data: uniqueProducts, source: 'MongoDB' });
     }
 
     // Fallback Memory Data Filter
@@ -54,7 +64,16 @@ router.get('/', async (req, res) => {
         p.supplier.name.toLowerCase().includes(term)
       );
     }
-    return res.json({ success: true, count: filtered.length, data: filtered, source: 'InMemory' });
+    const uniqueFiltered = [];
+    const seenFiltered = new Set();
+    for (const p of filtered) {
+      const normTitle = p.title.trim().toLowerCase();
+      if (!seenFiltered.has(normTitle)) {
+        seenFiltered.add(normTitle);
+        uniqueFiltered.push(p);
+      }
+    }
+    return res.json({ success: true, count: uniqueFiltered.length, data: uniqueFiltered, source: 'InMemory' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -290,6 +309,20 @@ router.patch('/:id/stock', async (req, res) => {
       return res.json({ success: true, message: `Product is now ${product.inStock ? 'In Stock' : 'Out of Stock'}!`, inStock: product.inStock });
     }
     return res.json({ success: true, message: 'Stock status updated (Demo Mode)' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/products/:id (Delete product)
+router.delete('/:id', async (req, res) => {
+  try {
+    if (getMongoStatus() && mongoose.Types.ObjectId.isValid(req.params.id)) {
+      const deleted = await Product.findByIdAndDelete(req.params.id);
+      if (!deleted) return res.status(404).json({ success: false, message: 'Product not found' });
+      return res.json({ success: true, message: 'Product deleted successfully', data: deleted });
+    }
+    return res.json({ success: true, message: 'Product deleted (Demo Mode)' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
