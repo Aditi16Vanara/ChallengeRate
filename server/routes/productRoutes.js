@@ -217,6 +217,11 @@ router.post('/validate-cart', async (req, res) => {
 // POST /api/products (Add product - Supplier Portal)
 router.post('/', async (req, res) => {
   try {
+    const userRole = req.headers['x-user-role'] || (req.body && req.body.userRole) || (req.user ? req.user.role : null);
+    if (userRole === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Only verified manufacturers can publish wholesale products.' });
+    }
+
     const {
       title,
       category,
@@ -300,6 +305,11 @@ router.put('/:id', async (req, res) => {
 // PATCH /api/products/:id/stock (Toggle in-stock status)
 router.patch('/:id/stock', async (req, res) => {
   try {
+    const userRole = req.headers['x-user-role'] || (req.body && req.body.userRole) || (req.user ? req.user.role : null);
+    if (userRole === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Buyers cannot modify seller inventory.' });
+    }
+
     const { inStock } = req.body;
     if (getMongoStatus()) {
       const product = await Product.findById(req.params.id);
@@ -317,6 +327,11 @@ router.patch('/:id/stock', async (req, res) => {
 // DELETE /api/products/:id (Delete product)
 router.delete('/:id', async (req, res) => {
   try {
+    const userRole = req.headers['x-user-role'] || (req.body && req.body.userRole) || (req.user ? req.user.role : null);
+    if (userRole === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Buyers cannot delete wholesale catalog products.' });
+    }
+
     if (getMongoStatus() && mongoose.Types.ObjectId.isValid(req.params.id)) {
       const deleted = await Product.findByIdAndDelete(req.params.id);
       if (!deleted) return res.status(404).json({ success: false, message: 'Product not found' });

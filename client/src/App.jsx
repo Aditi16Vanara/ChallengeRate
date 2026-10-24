@@ -227,6 +227,12 @@ export default function App() {
   };
 
   const handleNavigate = (view) => {
+    // Prevent buyers from entering seller portal
+    if (view === 'seller' && (!currentUser || currentUser.role !== 'supplier')) {
+      setToastMessage('Access Denied: The Seller Portal is strictly reserved for verified Manufacturer accounts.');
+      setTimeout(() => setToastMessage(''), 4500);
+      return;
+    }
     setCurrentView(view);
     if (view !== 'detail') setSelectedProduct(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -298,10 +304,39 @@ export default function App() {
             onOrderNegotiatedDeal={handleOrderNegotiatedDeal}
           />
         ) : currentView === 'seller' ? (
-          <SellerPortal
-            currentUser={currentUser}
-            onProductAdded={fetchProducts}
-          />
+          currentUser && currentUser.role === 'supplier' ? (
+            <SellerPortal
+              currentUser={currentUser}
+              onProductAdded={fetchProducts}
+            />
+          ) : (
+            <div style={{ maxWidth: '640px', margin: '4rem auto', textAlign: 'center', background: 'white', padding: '3rem 2rem', borderRadius: '1.5rem', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+              <div style={{ width: '64px', height: '64px', background: '#FEE2E2', color: '#DC2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.75rem' }}>
+                🛡️
+              </div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.5rem' }}>
+                Manufacturer Portal — Access Restricted
+              </h2>
+              <p style={{ color: '#64748B', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                You are currently logged in as a <strong>Wholesale Buyer</strong> ({currentUser ? currentUser.name : 'Buyer'}). The Seller Portal is strictly reserved for verified manufacturer accounts.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button
+                  className="btn-primary"
+                  onClick={() => handleNavigate('catalog')}
+                  style={{ padding: '0.65rem 1.5rem' }}
+                >
+                  Return to Wholesale Catalog
+                </button>
+                <button
+                  onClick={() => setIsAuthOpen(true)}
+                  style={{ background: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', padding: '0.65rem 1.5rem', borderRadius: '9999px', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Log in as Manufacturer
+                </button>
+              </div>
+            </div>
+          )
         ) : currentView === 'partner' ? (
           <PartnerPage currentUser={currentUser} />
         ) : currentView === 'profile' ? (
@@ -404,6 +439,7 @@ export default function App() {
       <MobileNav
         currentView={currentView}
         onNavigate={handleNavigate}
+        currentUser={currentUser}
       />
 
       {/* Login / Auth Modal */}
@@ -412,8 +448,14 @@ export default function App() {
         onClose={() => setIsAuthOpen(false)}
         onLoginSuccess={(user) => {
           setCurrentUser(user);
-          setToastMessage(`Welcome back, ${user.name}!`);
-          setTimeout(() => setToastMessage(''), 3000);
+          if (user.role === 'supplier') {
+            setCurrentView('seller');
+            setToastMessage(`Welcome to Seller Portal, ${user.name}!`);
+          } else {
+            setCurrentView('catalog');
+            setToastMessage(`Welcome back, ${user.name}!`);
+          }
+          setTimeout(() => setToastMessage(''), 3500);
         }}
       />
     </div>

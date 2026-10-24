@@ -1,7 +1,42 @@
 import React from 'react';
 import { Home, RotateCcw, Wallet, Zap, Building, User } from 'lucide-react';
 
-export default function MobileNav({ currentView, onNavigate }) {
+export default function MobileNav({ currentView, onNavigate, currentUser }) {
+  const isSupplier = currentUser && currentUser.role === 'supplier';
+
+  if (isSupplier) {
+    return (
+      <nav className="mobile-nav">
+        <a
+          href="#"
+          className={`nav-item ${currentView === 'seller' ? 'active' : ''}`}
+          onClick={(e) => { e.preventDefault(); onNavigate('seller'); }}
+        >
+          <Building size={19} />
+          <span>Portal</span>
+        </a>
+
+        <a
+          href="#"
+          className={`nav-item ${currentView === 'catalog' ? 'active' : ''}`}
+          onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
+        >
+          <Home size={19} />
+          <span>Catalog</span>
+        </a>
+
+        <a
+          href="#"
+          className={`nav-item ${currentView === 'profile' ? 'active' : ''}`}
+          onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}
+        >
+          <User size={19} />
+          <span>Profile</span>
+        </a>
+      </nav>
+    );
+  }
+
   return (
     <nav className="mobile-nav">
       <a
@@ -38,15 +73,6 @@ export default function MobileNav({ currentView, onNavigate }) {
       >
         <Zap size={19} />
         <span>Deals</span>
-      </a>
-
-      <a
-        href="#"
-        className={`nav-item ${currentView === 'seller' ? 'active' : ''}`}
-        onClick={(e) => { e.preventDefault(); onNavigate('seller'); }}
-      >
-        <Building size={19} />
-        <span>Seller</span>
       </a>
 
       <a

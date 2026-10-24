@@ -340,6 +340,37 @@ async function runTests() {
     }
   });
 
+  // 8. Account Separation & Role Permissions
+  await test('Security: Buyer is blocked from publishing products (403 Forbidden)', async () => {
+    const res = await fetch(`${API_BASE}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-role': 'buyer'
+      },
+      body: JSON.stringify({
+        title: 'Unauthorized Buyer Product',
+        category: 'Textiles',
+        basePrice: 100,
+        unit: 'Kg'
+      })
+    });
+    const data = await res.json();
+    assert.strictEqual(res.status, 403);
+    assert.strictEqual(data.success, false);
+    assert.ok(data.message.includes('Access Denied'));
+  });
+
+  await test('Security: Buyer is blocked from accessing seller orders (403 Forbidden)', async () => {
+    const res = await fetch(`${API_BASE}/orders/seller-orders`, {
+      headers: { 'x-user-role': 'buyer' }
+    });
+    const data = await res.json();
+    assert.strictEqual(res.status, 403);
+    assert.strictEqual(data.success, false);
+    assert.ok(data.message.includes('Access Denied'));
+  });
+
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passCount} / ${testCount} TESTS PASSED (100%)`);
   console.log('====================================================');

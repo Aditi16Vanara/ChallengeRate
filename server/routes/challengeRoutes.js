@@ -113,6 +113,11 @@ router.get('/my-challenges', async (req, res) => {
 // GET /api/challenges/manufacturer (Incoming challenges for manufacturer)
 router.get('/manufacturer', async (req, res) => {
   try {
+    const role = req.headers['x-user-role'] || req.query.userRole;
+    if (role === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Only verified manufacturers can view incoming rate challenges.' });
+    }
+
     const { supplierName } = req.query;
     if (getMongoStatus()) {
       let query = {};
@@ -129,6 +134,11 @@ router.get('/manufacturer', async (req, res) => {
 // PUT /api/challenges/:id/respond (Manufacturer response: ACCEPTED, COUNTERED, DECLINED)
 router.put('/:id/respond', async (req, res) => {
   try {
+    const role = req.headers['x-user-role'] || (req.body && req.body.userRole);
+    if (role === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Buyers cannot respond to or counter rate challenges.' });
+    }
+
     const { action, counterOfferPrice, notes, manufacturerName } = req.body;
     // action: 'ACCEPT' | 'COUNTER' | 'DECLINE'
 

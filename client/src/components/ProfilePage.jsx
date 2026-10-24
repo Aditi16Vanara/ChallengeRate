@@ -104,20 +104,11 @@ export default function ProfilePage({ currentUser, onOpenAuth, onRoleSwitch }) {
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {onRoleSwitch && (
-            <button
-              onClick={() => onRoleSwitch(role === 'buyer' ? 'supplier' : 'buyer')}
-              style={{ background: '#EFF6FF', color: '#00A3FF', border: '1px solid #BFDBFE', padding: '0.55rem 1.1rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.825rem', cursor: 'pointer' }}
-            >
-              Switch to {role === 'buyer' ? 'Manufacturer' : 'Buyer'} View
-            </button>
-          )}
-
           <button
             onClick={onOpenAuth}
-            style={{ background: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', padding: '0.55rem 1.15rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.825rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            style={{ background: '#0F3B9A', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.825rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 6px rgba(15,59,154,0.25)' }}
           >
-            <LogOut size={15} /> Switch / Login
+            <LogOut size={15} /> Switch / Sign In Account
           </button>
         </div>
       </div>

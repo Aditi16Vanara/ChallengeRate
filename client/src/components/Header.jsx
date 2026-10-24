@@ -44,107 +44,151 @@ export default function Header({
         {/* Navigation Links + Cart + User Pill */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           <nav style={{ display: 'flex', alignItems: 'center', gap: '1.1rem', fontSize: '0.85rem', fontWeight: 500 }}>
-            <a
-              href="/"
-              onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
-              style={{ textDecoration: 'none', color: currentView === 'catalog' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'catalog' ? 700 : 500 }}
-            >
-              <Home size={15} /> Home
-            </a>
+            {currentUser && currentUser.role === 'supplier' ? (
+              /* Manufacturer / Supplier Navigation */
+              <>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('seller'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'seller' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'seller' ? 700 : 500 }}
+                >
+                  <Building size={15} /> Seller Portal
+                </a>
 
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); onNavigate('repeat'); }}
-              style={{ textDecoration: 'none', color: currentView === 'repeat' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'repeat' ? 700 : 500 }}
-            >
-              <RotateCcw size={15} /> Repeat
-            </a>
+                <a
+                  href="/"
+                  onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'catalog' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'catalog' ? 700 : 500 }}
+                >
+                  <Home size={15} /> Wholesale Catalog
+                </a>
 
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); onNavigate('wallet'); }}
-              style={{ textDecoration: 'none', color: currentView === 'wallet' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'wallet' ? 700 : 500 }}
-            >
-              <Wallet size={15} /> Wallet
-            </a>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'profile' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'profile' ? 700 : 500 }}
+                >
+                  <User size={15} /> Profile
+                </a>
+              </>
+            ) : (
+              /* Wholesale Buyer Navigation - Seller Portal is strictly excluded */
+              <>
+                <a
+                  href="/"
+                  onClick={(e) => { e.preventDefault(); onNavigate('catalog'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'catalog' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'catalog' ? 700 : 500 }}
+                >
+                  <Home size={15} /> Home
+                </a>
 
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); onNavigate('challenges'); }}
-              style={{ textDecoration: 'none', color: currentView === 'challenges' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'challenges' ? 700 : 500 }}
-            >
-              <Zap size={15} /> Challenges
-            </a>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('repeat'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'repeat' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'repeat' ? 700 : 500 }}
+                >
+                  <RotateCcw size={15} /> Repeat
+                </a>
 
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); onNavigate('seller'); }}
-              style={{ textDecoration: 'none', color: currentView === 'seller' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'seller' ? 700 : 500 }}
-            >
-              <Building size={15} /> Seller Portal
-            </a>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('wallet'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'wallet' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'wallet' ? 700 : 500 }}
+                >
+                  <Wallet size={15} /> Wallet
+                </a>
 
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); onNavigate('partner'); }}
-              style={{ textDecoration: 'none', color: currentView === 'partner' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'partner' ? 700 : 500 }}
-            >
-              <Handshake size={15} /> Partner
-            </a>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('challenges'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'challenges' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'challenges' ? 700 : 500 }}
+                >
+                  <Zap size={15} /> Challenges
+                </a>
 
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}
-              style={{ textDecoration: 'none', color: currentView === 'profile' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'profile' ? 700 : 500 }}
-            >
-              <User size={15} /> Profile
-            </a>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('partner'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'partner' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'partner' ? 700 : 500 }}
+                >
+                  <Handshake size={15} /> Partner
+                </a>
+
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}
+                  style={{ textDecoration: 'none', color: currentView === 'profile' ? '#00A3FF' : '#334155', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: currentView === 'profile' ? 700 : 500 }}
+                >
+                  <User size={15} /> Profile
+                </a>
+              </>
+            )}
           </nav>
 
-          {/* Cart Trigger with Counter Badge */}
+          {/* Cart Trigger with Counter Badge (for buyers) */}
+          {(!currentUser || currentUser.role !== 'supplier') && (
+            <button
+              onClick={onOpenCart}
+              style={{
+                position: 'relative',
+                background: '#F1F5F9',
+                border: '1px solid #E2E8F0',
+                padding: '0.5rem 0.85rem',
+                borderRadius: '9999px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                cursor: 'pointer',
+                color: '#0F172A',
+                fontWeight: 700,
+                fontSize: '0.85rem'
+              }}
+              title="View Cart"
+            >
+              <ShoppingCart size={17} style={{ color: '#00A3FF' }} />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span
+                  style={{
+                    background: '#00A3FF',
+                    color: 'white',
+                    borderRadius: '9999px',
+                    padding: '0.1rem 0.45rem',
+                    fontSize: '0.7rem',
+                    fontWeight: 800
+                  }}
+                >
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* User Button with Role Tag */}
           <button
-            onClick={onOpenCart}
+            onClick={() => onNavigate('profile')}
             style={{
-              position: 'relative',
-              background: '#F1F5F9',
-              border: '1px solid #E2E8F0',
-              padding: '0.5rem 0.85rem',
+              background: currentUser && currentUser.role === 'supplier' ? '#0F3B9A' : '#00A3FF',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1.15rem',
               borderRadius: '9999px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
-              cursor: 'pointer',
-              color: '#0F172A',
-              fontWeight: 700,
-              fontSize: '0.85rem'
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}
-            title="View Cart"
-          >
-            <ShoppingCart size={17} style={{ color: '#00A3FF' }} />
-            <span>Cart</span>
-            {cartCount > 0 && (
-              <span
-                style={{
-                  background: '#00A3FF',
-                  color: 'white',
-                  borderRadius: '9999px',
-                  padding: '0.1rem 0.45rem',
-                  fontSize: '0.7rem',
-                  fontWeight: 800
-                }}
-              >
-                {cartCount}
-              </span>
-            )}
-          </button>
-
-          {/* User Button */}
-          <button
-            onClick={() => onNavigate('profile')}
-            style={{ background: '#00A3FF', color: 'white', border: 'none', padding: '0.5rem 1.15rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(0,163,255,0.25)' }}
           >
             <User size={15} />
-            <span>{currentUser ? currentUser.name.toLowerCase() : 'aditi'}</span>
+            <span>
+              {currentUser ? currentUser.name.toLowerCase() : 'aditi'}
+              <span style={{ opacity: 0.85, fontWeight: 500, fontSize: '0.75rem', marginLeft: '0.25rem' }}>
+                ({currentUser && currentUser.role === 'supplier' ? 'Manufacturer' : 'Buyer'})
+              </span>
+            </span>
           </button>
         </div>
       </div>

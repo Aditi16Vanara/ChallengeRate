@@ -303,6 +303,11 @@ router.get('/my-orders', async (req, res) => {
 // GET /api/orders/seller-orders (Supplier's incoming orders)
 router.get('/seller-orders', async (req, res) => {
   try {
+    const role = req.headers['x-user-role'] || req.query.userRole;
+    if (role === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Only verified manufacturers can view incoming seller orders.' });
+    }
+
     const { supplierName } = req.query;
     if (getMongoStatus()) {
       let query = {};
@@ -342,6 +347,11 @@ router.get('/:id', async (req, res) => {
 // PUT /api/orders/:id/status (Advance order status in pipeline)
 router.put('/:id/status', async (req, res) => {
   try {
+    const role = req.headers['x-user-role'] || (req.body && req.body.userRole);
+    if (role === 'buyer') {
+      return res.status(403).json({ success: false, message: 'Access Denied: Buyers cannot advance manufacturer dispatch status.' });
+    }
+
     const { status, note, ewayBillNumber, courierName, trackingNumber, updatedBy } = req.body;
     const permittedStatuses = [
       'ORDER_PLACED',

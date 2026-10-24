@@ -67,6 +67,58 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           </div>
         )}
 
+        {/* Quick Demo Evaluation Login Switcher */}
+        {!isRegister && (
+          <div style={{ marginBottom: '1.25rem', padding: '0.75rem', background: '#F8FAFC', borderRadius: '0.75rem', border: '1px solid #E2E8F0' }}>
+            <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
+              Quick Evaluation Credentials
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, email: 'aditi@gmail.com', password: 'Password123!' });
+                }}
+                style={{
+                  background: '#EFF6FF',
+                  border: '1.5px solid #BFDBFE',
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem 0.65rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: '#1D4ED8',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                🛒 Buyer Account
+                <div style={{ fontSize: '0.7rem', fontWeight: 500, color: '#60A5FA' }}>aditi@gmail.com</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, email: 'seller@clonex.com', password: 'Password123!' });
+                }}
+                style={{
+                  background: '#FEF3C7',
+                  border: '1.5px solid #FDE68A',
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem 0.65rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  color: '#92400E',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                🏭 Manufacturer Account
+                <div style={{ fontSize: '0.7rem', fontWeight: 500, color: '#D97706' }}>seller@clonex.com</div>
+              </button>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           {isRegister && (
             <>

@@ -41,11 +41,12 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
   const fetchData = () => {
     setLoading(true);
     const sellerName = currentUser && currentUser.businessName ? currentUser.businessName : 'Clonex';
+    const roleHeader = { 'x-user-role': currentUser ? currentUser.role : 'supplier' };
 
     Promise.all([
       fetch('/api/products').then(res => res.json()),
-      fetch(`/api/orders/seller-orders?supplierName=${encodeURIComponent(sellerName)}`).then(res => res.json()),
-      fetch(`/api/challenges/manufacturer?supplierName=${encodeURIComponent(sellerName)}`).then(res => res.json())
+      fetch(`/api/orders/seller-orders?supplierName=${encodeURIComponent(sellerName)}`, { headers: roleHeader }).then(res => res.json()),
+      fetch(`/api/challenges/manufacturer?supplierName=${encodeURIComponent(sellerName)}`, { headers: roleHeader }).then(res => res.json())
     ])
       .then(([prodData, ordData, chlData]) => {
         if (prodData.success) setProducts(prodData.data);
@@ -68,7 +69,10 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
     try {
       const res = await fetch(`/api/products/${productId}/stock`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-role': currentUser ? currentUser.role : 'supplier'
+        },
         body: JSON.stringify({ inStock: !currentStatus })
       });
       const data = await res.json();
@@ -103,7 +107,10 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
     try {
       const res = await fetch('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-role': currentUser ? currentUser.role : 'supplier'
+        },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -124,7 +131,10 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-role': currentUser ? currentUser.role : 'supplier'
+        },
         body: JSON.stringify({
           status: newStatus,
           ewayBillNumber: extra.ewayBill,
@@ -149,7 +159,10 @@ export default function SellerPortal({ currentUser, onProductAdded }) {
     try {
       const res = await fetch(`/api/challenges/${challengeId}/respond`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-role': currentUser ? currentUser.role : 'supplier'
+        },
         body: JSON.stringify({
           action,
           counterOfferPrice: extra.price,
